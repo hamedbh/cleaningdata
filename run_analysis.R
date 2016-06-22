@@ -31,6 +31,14 @@ varnames = tbl_df(varnames)
 # Now reassign the variable names for df using names()
 names(df) = varnames$V2
 
+# Remove the duplicate variable names
+df2 = df[ , !duplicated(colnames(df))]
+
+# Use select() and matches() to select only those columns that 
+# contain "mean()" or "std()", and assign to df3, which is our answer
+# for this section
+df3 = select(matches("mean\\(\\)|std\\(\\)")) 
+
 # From reading the support files we can see that each of the 
 ## 3. Uses descriptive activity names to name the activities in the data set
 ## 4. Appropriately labels the data set with descriptive variable names.
