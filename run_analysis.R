@@ -1,6 +1,6 @@
 ## 1. Merge the training and the test sets to create one data set.
 
-# First lets load some libraries that will be useful, get the file downloaded,
+# First let's load some libraries that will be useful, get the file downloaded,
 # unzipped and loaded into memory.
 
 library(downloader)
