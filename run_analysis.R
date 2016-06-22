@@ -4,7 +4,7 @@
 # unzipped and loaded into memory.
 
 library(downloader)
-library(lubridate)
+library(reshape2)
 library(dplyr)
 fileUrl = "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 download(fileUrl, "run_data.zip")
@@ -39,7 +39,8 @@ df = tbl_df(df)
 ## 2. Extract only the measurements on the mean and standard
 ## deviation for each measurement.
 
-# There are a bunch of duplicate variable names, so let's get rid of those
+# There are a bunch of duplicate variable names, but none of them are for mean
+# or standard deviation measurements, so let's get rid of those
 df2 = df[ , !duplicated(colnames(df))]
 
 # Use select() and matches() to select only those columns that 
@@ -47,6 +48,7 @@ df2 = df[ , !duplicated(colnames(df))]
 # subjectid and activityid columns
 df3 = select(df2, matches("mean\\(\\)|std\\(\\)"))
 df4 = cbind(df2$subjectid, df2$activityid, df3)
+df4 = rename(df4, subjectid = `df2$subjectid`, activityid = `df2$activityid`)
 df4 = tbl_df(df4)
 
 ## 3. Uses descriptive activity names to name the activities in the data set
@@ -61,10 +63,22 @@ charlabels = as.character(act_labels$V2)
 # vector charlabels created above
 df4$subjectid = as.factor(df4$subjectid)
 df4$activityid = as.factor(df4$activityid)
-levels(df5$activityid) = charlabels
+levels(df4$activityid) = charlabels
 
 # That gives us useful labels for the activities in the data set
 
 ## 4. Appropriately labels the data set with descriptive variable names.
+# This was handled above
+
 ## 5. From the data set in step 4, creates a second, independent tidy data set 
 ## with the average of each variable for each activity and each subject.
+
+# First we melt the data frame down, and then cast it with mean values as 
+# required
+
+melted = melt(df4, id = c("subjectid", "activityid"))
+recast = dcast(melted, subjectid + activityid ~ variable, mean)
+
+# And finally write out the file we need, calling it tidydata.txt
+
+write.table(recast, "tidydata.txt", quote = FALSE, row.names = FALSE)
